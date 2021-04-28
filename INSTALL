@@ -1,14 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title></title>
-<meta name="Creator" content="Writer"/>
-<meta name="Producer" content="LibreOffice 6.2"/>
-<meta name="CreationDate" content=""/>
-</head>
-<body>
-<pre>
- 
-README - HTML Format
+README
 
 WhompOS Systems & Services – Installation Guide
 By Jeffrey White – 03/16/2019
@@ -108,7 +98,10 @@ as compileing and installing from the root account can severly DAMAGE your newly
 system if done incorrectly. Especially since there is NO pkg managment in this system in this
 release. Subsecuent releases such as 4.1 onward. Once a standard user is setup and configured with
 sudo privaledges you should disable the password to the root user by running:
-passwd -dl root
+
+[##AS SUDO USER with NO ""##] 
+"sudo passwd -dl root"
+
 This will disable access to the root user account, so root will only be accessable by running the
 appropriate command.
 This is a security measure to deny unauthorized or non-sudo users access root or its privalages.
@@ -124,6 +117,30 @@ Emails listed below:
 support@whompy.org
 support@whompos.com
 bugs@whompy.org
-</pre>
-</body>
-</html>
+
+Default Configuration - ( The SUPER Easist Part bar none )
+
+To configure the the system with the most basic of defaut setting do these simple thing:
+
+     1. Download wosdotfiles-4.0.tar.xz from **download site and link pending publication** to:
+     ~/tmp (create if need using mkdir -v ~/tmp)
+     2. Run the following
+            
+cat >> default-config.sh << "EOF"
+#!/bin/bash 
+
+pushd /                                &&
+tar xf ~/tmp/wosdotfiles-4.0.tar.xz    &&
+rm -rf ~/tmp/wosdotfiles-4.0*          &&
+popd
+EOF
+      3. RUN this as root:  "./default-config.sh"
+
+Whoo-Hoo Your done. 
+This completes the default system configuration.  
+
+I dont want to explain my reasoning for this approch to the system configuration, but
+basically it allows the user to either setup a quit and very basic minimalist system 
+that they can either keep as is, or if they choose to setup the system as they with
+they can.  HENCE it merely is following the "WTFPL Licensing" guidelines. Info on this
+licence can be found via the following link: http://www.wtfpl.net/about
