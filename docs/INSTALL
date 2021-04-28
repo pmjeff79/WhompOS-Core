@@ -1,0 +1,146 @@
+README
+
+WhompOS Systems & Services – Installation Guide
+By Jeffrey White – 03/16/2019
+LICENCES: CC-A-1, GPL-1, GPL-2, GPL-3*, WTFPL
+*(THIS list is NOT yet complete and will be added in totality in the next release)
+Basic installation instructions for version whompos-4.0 (BETA release)
+1. Download whompos base platform and the whompos signing key using the links below:
+Download
+
+<key link broken> this is being resolved for the 4.1 or 4.0.1 releases onward….
+This is the base x86_64 system with kernel x.xx.x preinstalled. It has NO package
+management included and should have a good amount of drivers compiled into the kernel. If you
+have hardware that doesn’t work with the kernel provided then it can be recompiled. (if you do not
+know how to recompile a kernel please contact support via email and instructions will be sent to
+you) request kernel instructions
+2. Download the build tools if needed from here:
+Build Tools
+
+This is rarely needed but instructions on how to use these or what to do with them and how
+to properly install them can be requested here: build tool docs
+3. Create two partitions.
+A) A system partition of the ext4 format sufficient in size to accommodate the system.
+ii) minimum size 3GB this give you almost no room for anything else to be installed and or put in
+the system. A recommended amount for functional amount would be 60-80GB, but it’s totally your
+call as to size, as your only limited is your hard drive size minus the swap.
+SATA: mkfs.ext4 -v /dev/sdXX
+PATA or IDE: mkfs.ext4 -v /dev/hdXX
+
+B) A swap part of at least 2 to 4GB in size
+mkswap -v [path to swap partition]
+4. Mount the partition to “/mnt/wos” you will need to create the mountpoint first. The easiest way
+to do this is to create an Environmental Variable (ENVAR) on your host. This will make it easier in
+the long run and save some extra typing. To create the set the ENVAR on the host in a terminal run:
+export WOS=/mnt/wos
+then to mount run:
+sudo mount -v /dev/sdXX $WOS
+
+5. Now that the partition is mounted. Go to the directory containing the base system and run as
+root:tar xvf [BASE SYSTEM NAME].tar.[bz2.gz.xz]
+The compressed tar is about 400MB. When extracted to the partition it is just over 2GB.
+Once extracted to the partition you have three choices. You can either mount a virtual kernel to
+work with the system before actually making it bootable. Option two is to reconfigure grub on your
+host to make whompos bootable, or the both.
+If you choose option one then you will need to run the following as root from the host.
+READ ** BELOW BEFORE RUNNING:
+mount -v –bind /dev $WOS/dev
+mount -vt /dev/pts $WOS/dev/pts -o gid=5,mode=620
+mount -vt proc proc $WOS/proc
+mount -vt sysfs sysfs $WOS/sys
+mount -vt tmpfs tmpfs $WOS/run
+then as root
+chroot -v “$WOS“ /usr/bin/env -i \
+HOME=/root TERM=$TERM
+\
+PS1=`\u@\h:[ \w ]:$ `
+
+\
+
+PATH=`/bin:/usr/bin:/sbin:/usr/sbin` \
+/bin/bash login -h
+then you will see this on your terminal screen meaning you have successfully chrooted into the new
+system via the host. HINT and warning: This can method should be used for ethical legitimate
+purposes only, as it bypasses login completely and makes you the root user on the mounted partition
+with full access to it, so ask permission first. Unethically this could be used to insert malicious
+software or autorun commands into a linux system to auto execute apon login or by the user running
+a script. THIS is a complete breach of faith and may or may not be criminal depending on you
+local / national laws. SO this is to be used on systems you own or are authorized to use only. Any
+other use of this bypass should be discouraged.
+root@whompos:[~/]:$
+**[DO NOT FORGET that this will mount parts of your HOST system to the mounted WOS
+system to virtually simulate a kernel. This can destroy your host if certain commands are run, so
+this option is NOT RECCOMENDED unless you know what you are doing and have a grasp as to
+what commands [there ARE MANY MANY MANY] not to ever run unless you really wanna
+screw up your host.]
+Option two is to make the system bootable via grub on your host. To do this run the following from
+the host system as root
+grub-mkconfig -o /boot/grub/grub.cfg
+
+then reboot your system by running:
+As root: reboot
+or
+as standard user: sudo reboot
+Once the system reboots and your at the grub boot option screen just select the system you‘d like to
+boot, let it finish booting, and you‘re all set. There is NO user setup on the system except the ROOT
+user. You can login with the following credentials and then immediatley change the password to
+whatever you‘d like
+login: root
+password: default
+to change root password run: passwd root
+and follow the onscreen instruction.
+To add a standard user[*] you will need to run useradd with the options and arguments you would
+like.
+(*) sudo is not installed so this user will only have non-privalidged access. Your system administrator
+can install it for you if needed. It is recommended to install sudo and to adjust the sudoers file with
+`visudo` in that order if you want to have a standard user installed. This is HIGHLY recommended
+as compileing and installing from the root account can severly DAMAGE your newly installed wos
+system if done incorrectly. Especially since there is NO pkg managment in this system in this
+release. Subsecuent releases such as 4.1 onward. Once a standard user is setup and configured with
+sudo privaledges you should disable the password to the root user by running:
+
+[##AS SUDO USER with NO ""##] 
+"sudo passwd -dl root"
+
+This will disable access to the root user account, so root will only be accessable by running the
+appropriate command.
+This is a security measure to deny unauthorized or non-sudo users access root or its privalages.
+This concludes the installation installation portion of WhompOS 4.0 BETA. 
+
+[ For basic [and/or] limited support, including questions, or bugs you have found you can 
+email one of the following: Be aware that the support/help emails take abount 1-2 days depending on the content of the request. 
+Bug reporting is VERY VERY much appriceated, so PLEASE SEND them with attached copies of system logs and a detailed
+explanation of the who, what, when, where, how of the bug that occured, If it is reproducable, and any pertnent information that is
+important to one of the following. ]
+
+Emails listed below:
+support@whompy.org
+support@whompos.com
+bugs@whompy.org
+
+Default Configuration - ( The SUPER Easist Part bar none )
+
+To configure the the system with the most basic of defaut setting do these simple thing:
+
+     1. Download wosdotfiles-4.0.tar.xz from **download site and link pending publication** to:
+     ~/tmp (create if need using mkdir -v ~/tmp)
+     2. Run the following
+            
+cat >> default-config.sh << "EOF"
+#!/bin/bash 
+
+pushd /                                &&
+tar xf ~/tmp/wosdotfiles-4.0.tar.xz    &&
+rm -rf ~/tmp/wosdotfiles-4.0*          &&
+popd
+EOF
+      3. RUN this as root:  "./default-config.sh"
+
+Whoo-Hoo Your done. 
+This completes the default system configuration.  
+
+I dont want to explain my reasoning for this approch to the system configuration, but
+basically it allows the user to either setup a quit and very basic minimalist system 
+that they can either keep as is, or if they choose to setup the system as they with
+they can.  HENCE it merely is following the "WTFPL Licensing" guidelines. Info on this
+licence can be found via the following link: http://www.wtfpl.net/about
